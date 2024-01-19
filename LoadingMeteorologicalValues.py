@@ -44,6 +44,18 @@ def update():
     disp.ShowImage(image1, 0, 0)
 
 
+def readSensors():
+    bme280.overscan_pressure = adafruit_bme280.OVERSCAN_X16
+    bme280.overscan_humidity = adafruit_bme280.OVERSCAN_X1
+    bme280.overscan_temperature = adafruit_bme280.OVERSCAN_X2
+
+    temp = bme280.temperature
+    humidity = bme280.humidity
+    pressure = bme280.pressure
+
+    return (temp, humidity, pressure)
+
+
 def get():
     global temp
     global humidity
