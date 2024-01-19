@@ -69,6 +69,9 @@ def update(disp):
 
 
 def readSensors():
+    i2c = busio.I2C(board.SCL, board.SDA)
+    bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c, 0x76)
+
     bme280.overscan_pressure = adafruit_bme280.OVERSCAN_X16
     bme280.overscan_humidity = adafruit_bme280.OVERSCAN_X1
     bme280.overscan_temperature = adafruit_bme280.OVERSCAN_X2
