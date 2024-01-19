@@ -75,6 +75,7 @@ if __name__ == "__main__":
     bme280.standby_period = adafruit_bme280.STANDBY_TC_500
     bme280.iir_filter = adafruit_bme280.IIR_FILTER_X16
 
+    get()
     show()
 
     while True:
