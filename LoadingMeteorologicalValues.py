@@ -18,28 +18,52 @@ global pressure
 global altitude
 
 
-def show():
+def show(disp):
 
-    disp = SSD1331.SSD1331()
+    
     # Initialize library.
     disp.Init()
     image1 = Image.new("RGB", (disp.width, disp.height), "WHITE")
     draw = ImageDraw.Draw(image1)
-    draw.text((0, 0), f"Temp: {round(temp, 1)}", fill="BLACK")
-    draw.text((0, 25), f"Humidity: {round(humidity, 1)}", fill="BLACK")
-    draw.text((0, 50), f"Pressure: {round(pressure, 1)}", fill="BLACK")
+
+    fontParam = ImageFont.truetype('./lib/oled/Font.ttf', 8)
+
+    image_temperature = Image.open('./temperature.png')
+    image_temperature = image_temperature.resize((15, 10))
+    image_humidity = Image.open('./humidity.png')
+    image_humidity = image_humidity.resize((15, 10))
+    image_pressure = Image.open('./pressure.png')
+    image_pressure = image_pressure.resize((15, 10))
+
+    image1.paste(image_temperature, (0, 0))
+    draw.text((17, 0), f"Temperature: {round(temp, 1)}", font=fontParam, fill="BLACK")
+    image1.paste(image_humidity, (0, 25))
+    draw.text((17, 25), f"Humidity: {round(humidity, 1)}", font=fontParam, fill="BLACK")
+    image1.paste(image_pressure, (0, 50))
+    draw.text((17, 50), f"Pressure: {round(pressure, 1)}", font=fontParam, fill="BLACK")
 
     disp.ShowImage(image1, 0, 0)
 
 
-def update():
-    disp = SSD1331.SSD1331()
-
+def update(disp):
+    
     image1 = Image.new("RGB", (disp.width, disp.height), "WHITE")
     draw = ImageDraw.Draw(image1)
-    draw.text((0, 0), f"Temp: {round(temp, 1)}", fill="BLACK")
-    draw.text((0, 25), f"Humidity: {round(humidity, 1)}", fill="BLACK")
-    draw.text((0, 50), f"Pressure: {round(pressure, 1)}", fill="BLACK")
+    fontParam = ImageFont.truetype('./lib/oled/Font.ttf', 8)
+    
+    image_temperature = Image.open('./temperature.png')
+    image_temperature = image_temperature.resize((15, 10))
+    image_humidity = Image.open('./humidity.png')
+    image_humidity = image_humidity.resize((15, 10))
+    image_pressure = Image.open('./pressure.png')
+    image_pressure = image_pressure.resize((15, 10))
+
+    image1.paste(image_temperature, (0, 0))
+    draw.text((17, 0), f"Temperature: {round(temp, 1)}", font=fontParam, fill="BLACK")
+    image1.paste(image_humidity, (0, 25))
+    draw.text((17, 25), f"Humidity: {round(humidity, 1)}", font=fontParam, fill="BLACK")
+    image1.paste(image_pressure, (0, 50))
+    draw.text((17, 50), f"Pressure: {round(pressure, 1)}", font=fontParam, fill="BLACK")
 
     disp.ShowImage(image1, 0, 0)
 
@@ -88,9 +112,11 @@ if __name__ == "__main__":
     bme280.iir_filter = adafruit_bme280.IIR_FILTER_X16
 
     get()
-    show()
+    disp = SSD1331.SSD1331()
+
+    show(disp)
 
     while True:
         get()
-        update()
+        update(disp)
         time.sleep(5)
