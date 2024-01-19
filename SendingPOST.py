@@ -1,23 +1,12 @@
 import requests
-from LoadingMeteorologicalValues import readSensors
+from ReadingData import readSensors
+from Card import buzz
 
 
-def sendTo(api_url, raw_data, isCard = False):
-
-    if isCard:
-        content_type = "CardData"
-    else:
-        content_type = "WeatherData"
-        
-    headers = {
-        "Content-Type": content_type,
-        "Authorization": "",  
-    }
+def sendTo(api_url, raw_data):
     
-    # Wysłanie zapytania POST
     response = requests.post(api_url, data=raw_data)
     
-    # Sprawdź status odpowiedzi
     if response.status_code == 200:
         print("Zapytanie POST zostało pomyślnie wysłane.")
         print("Odpowiedź serwera:", response.text)
@@ -30,8 +19,8 @@ def sendWeatherData(api_url = "http://10.108.33.110:8000/api/send_weather_data/"
     sendTo(api_url, getWeatherData())
 
 
-def sendCardData(card_id, api_url = "http://10.108.33.110:8000/api/send_weather_data/"):
-    sendTo(api_url, card_id, True)
+def sendCardData(card_id, api_url = "http://10.108.33.110:8000/api/check_employee_card/"):
+    sendTo(api_url, {"card_number": card_id, "weather_station": "f4085dc7-9284-4e13-b53f-a6284979ce64"})
 
 
 def getWeatherData():
@@ -53,3 +42,4 @@ def getWeatherData():
 
 if __name__ == "__main__":
     sendWeatherData()
+    
