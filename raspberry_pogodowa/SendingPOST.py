@@ -1,6 +1,6 @@
 import requests
 from LoadingMeteorologicalValues import readSensors
-from Card import buzz
+from Modules import buzz
 
 weather_station_id = "cd048075-b98d-447e-9dcf-bde77f142bb9"
 
@@ -29,7 +29,7 @@ def sendWeatherData(api_url = "http://10.108.33.110:8000/api/send_weather_data/"
 
 
 def notifyServerTime(card_id, api_url = "http://10.108.33.110:8000/api/handle_work_time/"):
-    sendTo(api_url, {"card_number": card_id, "weather_station": weather_station_id})
+    return sendTo(api_url, {"card_number": card_id, "weather_station": weather_station_id})
 
 
 def sendCardData(card_id, api_url = "http://10.108.33.110:8000/api/check_employee_card/"):
@@ -39,10 +39,6 @@ def sendCardData(card_id, api_url = "http://10.108.33.110:8000/api/check_employe
 def getWeatherData():
 
     (temp, hum, press) = readSensors()
-
-    print(temp)
-    print(hum)
-    print(press)
 
 
     data_to_send = {
