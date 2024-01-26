@@ -16,6 +16,5 @@ def sendTo(api_url, raw_data):
     return response.status_code
 
 
-
-def sendCardData(card_id, api_url = "http://10.108.33.110:8000/api/check_employee_card/"):
+def sendCardData(card_id, api_url = "http://10.108.33.110:8000/api/new_employee_card/"):
     return sendTo(api_url, {"card_number": card_id, "weather_station": "cd048075-b98d-447e-9dcf-bde77f142bb9"})

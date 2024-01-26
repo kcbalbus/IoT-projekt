@@ -5,13 +5,16 @@ import RPi.GPIO as GPIO
 from config import * # pylint: disable=unused-wildcard-import
 from mfrc522 import MFRC522
 from datetime import datetime
-from sendingPost import sendCardData
+from post_request_card_registration import sendCardData
 import neopixel
 import board
 from PIL import Image, ImageDraw, ImageFont
 import lib.oled.SSD1331 as SSD1331
 
-global disp
+disp = SSD1331.SSD1331()
+executing = True
+terminate = True
+card_read_active = False
 
 def rfidRead(MIFAREReader):
     (status, _) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
@@ -20,15 +23,41 @@ def rfidRead(MIFAREReader):
         if status == MIFAREReader.MI_OK:
             processScan(uid)
             while status == MIFAREReader.MI_OK:
-                pass
+                MIFAREReader = MFRC522()
+                (status, _) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
 
 
 def processScan(uid):
+    global card_read_active
+    card_read_active = True
     (num, dt) = rfidScanInfo(uid)
     buzz()
     printScanInfo(num, dt)
-    response = cardRead(num)
-    succesDisplay(response)
+    response = postCardRead(num)
+    succesDisplay(disp, response)
+    card_read_active = False
+
+
+def buttonGreenPressedCallback(channel):
+    global executing  
+
+    if not card_read_active:
+        executing = not executing
+
+        if executing:
+            turnOnDevice(disp)
+        else:
+            turnOffDevice(disp)
+            
+        print(executing)
+
+
+def buttonRedPressedCallback(channel):
+    global terminate 
+    global executing
+    if not card_read_active:
+        executing= False
+        terminate = False
 
 
 def rfidScanInfo(uid):
@@ -47,16 +76,19 @@ def printScanInfo(num, dt):
 def postCardRead(num):
     return sendCardData(num)
 
+
 def startCardReading():
     print('Place the card close to the reader.')
     MIFAREReader = MFRC522()
-    while True:
-        rfidRead(MIFAREReader)
+    while terminate:
+        while executing:
+            rfidRead(MIFAREReader)
 
 
 if __name__ == "__main__":
-    global disp
-    disp = SSD1331.SSD1331()
     disp.Init()
-    displayInfo()
+    GPIO.add_event_detect(buttonGreen, GPIO.FALLING, callback=buttonGreenPressedCallback, bouncetime=500)
+    GPIO.add_event_detect(buttonRed, GPIO.FALLING, callback=buttonRedPressedCallback, bouncetime=500)
+    displayInfoON(disp)
     startCardReading()
+    disp.clear()

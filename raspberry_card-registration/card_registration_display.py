@@ -4,17 +4,22 @@ import RPi.GPIO as GPIO
 from config import * # pylint: disable=unused-wildcard-import
 from mfrc522 import MFRC522
 from datetime import datetime
-from sendingPost import sendCardData
+from post_request_card_registration import sendCardData
 import neopixel
 import board
 from PIL import Image, ImageDraw, ImageFont
 import lib.oled.SSD1331 as SSD1331
+
+CARD_ACTIVE = 200 
+CARD_NEW = 201
+CARD_INACTIVE = 403 
 
 
 def buzz():
     GPIO.output(buzzerPin, False)
     time.sleep(1)
     GPIO.output(buzzerPin, True)
+
 
 def displayLight(color):
     GPIO.setmode(GPIO.BCM)
@@ -27,15 +32,14 @@ def displayLight(color):
 
 def displayLightOn(response):
 
-    match response:
-        case 200:
-            color = (0, 255, 0)
-        case 201:
-            color = (0, 0, 255)
-        case 401:
-            color = (255, 255, 0)
-        case _:
-            color = (255, 0, 0)
+    if response==CARD_ACTIVE:
+        color = (0, 255, 0)
+    elif response==CARD_NEW:
+        color = (0, 0, 255)
+    elif response== CARD_INACTIVE:
+        color = (255, 255, 0)
+    else:
+        color = (255, 0, 0)
 
     displayLight(color)
 
@@ -63,37 +67,50 @@ def drawAlert(images, alert):
 
     for word in alert_words:
         if len(single_line+" "+word)>18:
-            draw.text((text_position,0), single_line, font=fontParam, fill="WHITE")
+            draw.text((0, text_position), single_line, font=fontParam, fill="WHITE")
             text_position+=15
             single_line=""
         single_line = single_line + word + " "
 
     if(len(single_line)>0):
-        draw.text((text_position, 0), single_line, font=fontParam, fill="WHITE")
+        draw.text((0, text_position), single_line, font=fontParam, fill="WHITE")
 
 
-def displayInfo(disp):
-    display(disp, "Register new card")
+def turnOffDevice(disp):
+    displayLightOff()
+    displayInfoOFF(disp)
+
+
+def turnOnDevice(disp):
+    displayInfoON(disp)
+
+
+def displayInfoON(disp):
+    display(disp, "Card registration")
+
+
+def displayInfoOFF(disp):
+    display(disp, "Device turned off- press green button to start")
 
 
 def displayScan(disp, response):
-    match response:
-        case 200:
-            alert = "Card active"
-        case 201:
-            alert = "New card"
-        case  401:
-            alert = "Card inactive"
-        case _:
-            alert = "Error"
+    if response==CARD_ACTIVE:
+        alert = "Card already registered - active"
+    elif response==CARD_NEW:
+        alert = "New card registered"
+    elif response== CARD_INACTIVE:
+        alert = "Card already registered - inactive"
+    else:
+        alert = "Error"
 
     display(disp, alert)
+
 
 def succesDisplay(disp, response):
     displayLightOn(response)
     displayScan(disp, response)
-    time.sleep(3)
+    time.sleep(2)
     displayLightOff()
-    displayInfo(disp)
+    displayInfoON(disp)
 
 
