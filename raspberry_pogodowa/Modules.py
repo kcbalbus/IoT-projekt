@@ -3,16 +3,37 @@ import RPi.GPIO as GPIO
 from config import * # pylint: disable=unused-wildcard-import
 from mfrc522 import MFRC522
 from datetime import datetime
+import neopixel
+import board
 
 def buzz():
     GPIO.output(buzzerPin, False)
     time.sleep(1)
     GPIO.output(buzzerPin, True)
 
+def blink_fast_twice(color):
+    displayLight(color)
+    time.sleep(0.3)
+    displayLight((0, 0, 0))
+    time.sleep(0.3)
+    displayLight(color)
+    time.sleep(0.3)
+    displayLight((0, 0, 0))
+
+
+
 def blink():
     GPIO.output(led1, GPIO.HIGH)
     time.sleep(1)
     GPIO.output(led1, GPIO.LOW)
+
+def displayLight(color):
+    GPIO.setmode(GPIO.BCM)
+    pixels = neopixel.NeoPixel(board.D18, 8, brightness=1.0/32, auto_write=False)
+
+    for i in range(8):
+        pixels[i] = color
+    pixels.show()
 
 def rfidRead():
     MIFAREReader = MFRC522()
