@@ -1,16 +1,19 @@
 from queue import Empty
+from sys import displayhook
 import time
 import RPi.GPIO as GPIO
-from config import * # pylint: disable=unused-wildcard-import
+from config import * 
 from mfrc522 import MFRC522
 from datetime import datetime
 from Card import buzz
 from SendingPOST import notifyServerTime, validateCard, sendWeatherData
+from LoadingMeteorologicalValues import initDisp, dispValues, readSensors
 
 
 card_set = set()
 last_send = time.time()
-
+global displ
+displ = initDisp()
 
 def ScanCard():
     MIFAREReader = MFRC522()
@@ -40,7 +43,7 @@ def ScanCard():
 def notify_set(id):
     if id in card_set:
         card_set.remove(id)
-    else:
+    else:        
         card_set.add(id)
 
 
@@ -50,6 +53,13 @@ def sendDataOnce():
     if card_set and (curr_time - last_send > 10):
         last_send = curr_time
         sendWeatherData()
+        showWeatherData()
+
+
+def showWeatherData():
+
+    (tem, hum, press) = readSensors()
+    dispValues(tem, hum, press, displ)
 
 
 if __name__ == "__main__":
